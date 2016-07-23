@@ -28,7 +28,8 @@ public class Admin {
 	
 	public Admin(String title) {
 		// Run
-		readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
+		//readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
+		readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
@@ -46,7 +47,7 @@ public class Admin {
                 //存放每一列資料內容(橫的)
                 ArrayList<String> ticketStr = new ArrayList<String>();
                 
-                String item[] = line.split(",");//csv文件為依據逗號切割
+                String[] item = line.split(",");//csv文件為依據逗號切割
                 
                 //清除上一次存入的資料
                 ticketStr.clear();
@@ -54,7 +55,7 @@ public class Admin {
                 //讀檔(單列資料)
                 for(int i=0; i<item.length; i++){
                     
-                    ticketStr.add(i, item[i]);
+                    ticketStr.add(item[i]);
                     
 //                    System.out.println(ticketStr.get(i));
                 }
@@ -68,18 +69,22 @@ public class Admin {
 			ie.printStackTrace();
 		}
 		
-		// 測試
-		for (int i = 0; i < dataTable.size(); i++) {
-			for (int j = 0; j < dataTable.get(i).size(); j++) {
-				System.out.print(dataTable.get(i).get(j));
+		// print table for test
+		printTable(dataTable);
+		
+		return dataTable;
+	}
+	
+	public void printTable(ArrayList<List<String>> inputTable) {
+		for (int i = 0; i < inputTable.size(); i++) {
+			for (int j = 0; j < inputTable.get(i).size(); j++) {
+				System.out.print(inputTable.get(i).get(j));
 				System.out.print("             ");
-				if (j == dataTable.get(i).size() -1 )
+				if (j == inputTable.get(i).size() -1 )
 					System.out.println();
 					
 			}
 		}
-		
-		return dataTable;
 	}
 
 	public static void main(String[] args) {
