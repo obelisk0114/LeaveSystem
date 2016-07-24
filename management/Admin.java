@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
 import javax.swing.JPopupMenu;
 
 import java.awt.event.ActionEvent;
@@ -23,17 +24,26 @@ public class Admin {
 	final int height = 800;
 	
 	private JFrame mainFrame;
-	private JPanel mainTable;
-	private List<JButton> person;
+	private JPanel totalTable, headerTable, staffTable;
+	private JScrollPane containTable;
+	private List<JLabel> item = new ArrayList<JLabel>(50);
+	private ArrayList<List<JLabel>> personLeave = new ArrayList<List<JLabel>>(50);
+	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>(50);
 	
 	public Admin(String title) {
 		// Run
-		//readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
-		readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
+		mainFrame = new JFrame(title);
+		totalTable = new JPanel();
+		headerTable = new JPanel();
+		staffTable = new JPanel();
+		containTable = new JScrollPane(totalTable); 
+		
+		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
+		ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
-		ArrayList<List<String>> dataTable = new ArrayList<List<String>>();
+		ArrayList<List<String>> Table = new ArrayList<List<String>>();
 		
 		BufferedReader reader;
 		try {
@@ -57,11 +67,13 @@ public class Admin {
                     
                     ticketStr.add(item[i]);
                     
-//                    System.out.println(ticketStr.get(i));
+//                  System.out.println(ticketStr.get(i));
                 }
                 
-                dataTable.add(ticketStr);
+                Table.add(ticketStr);
             }
+            
+            reader.close();
 			
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();
@@ -70,9 +82,23 @@ public class Admin {
 		}
 		
 		// print table for test
-		printTable(dataTable);
+		printTable(Table);
 		
-		return dataTable;
+		return Table;
+	}
+	
+	public void launchFrame() {
+		mainFrame.setSize(width, height);
+		
+		totalTable.setLayout(new GridLayout(2, 1));
+		totalTable.add(headerTable);
+		totalTable.add(staffTable);
+		totalTable.setVisible(true);
+		
+		mainFrame.add(containTable);
+		mainFrame.setLocation(350, 150);
+		mainFrame.setVisible(true);
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	public void printTable(ArrayList<List<String>> inputTable) {
@@ -90,6 +116,7 @@ public class Admin {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Admin ad = new Admin("請假管理系統");
+		ad.launchFrame();
 
 	}
 
