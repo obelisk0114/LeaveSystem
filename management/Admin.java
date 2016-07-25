@@ -40,6 +40,7 @@ public class Admin {
 		
 		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
 		ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
+		filledEmptySpace(dataTable);
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
@@ -62,8 +63,9 @@ public class Admin {
                 //清除上一次存入的資料
                 ticketStr.clear();
                 
+                //System.out.println(item.length);
                 //讀檔(單列資料)
-                for(int i=0; i<item.length; i++){
+                for(int i = 0; i < item.length; i++){
                     
                     ticketStr.add(item[i]);
                     
@@ -85,6 +87,33 @@ public class Admin {
 		printTable(Table);
 		
 		return Table;
+	}
+	
+	public void filledEmptySpace(ArrayList<List<String>> inputTable) {
+		int maxSize = inputTable.get(0).size();
+		boolean reRun = false;
+		
+		for (int i = 1; i < inputTable.size(); i++) {
+			
+			// If the i_th row is smaller than the first row, fill it with "". 
+			if (inputTable.get(i).size() < maxSize) {
+				for (int j = inputTable.get(i).size(); j < maxSize; j++) {
+					inputTable.get(i).add("");
+				}				
+			}
+			else if (inputTable.get(i).size() > maxSize) {
+				for (int j = maxSize; j < inputTable.get(i).size(); j++) {
+					inputTable.get(0).add("");
+				}
+				
+				maxSize = inputTable.get(i).size();
+				reRun = true;
+				break;
+			}
+		}
+		
+		if (reRun == true)
+			filledEmptySpace(inputTable);
 	}
 	
 	public void launchFrame() {
