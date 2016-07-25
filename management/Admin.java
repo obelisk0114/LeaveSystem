@@ -19,16 +19,18 @@ import java.awt.GridLayout;
 import java.util.List;
 import java.util.ArrayList;
 
+int maxSize = -1;
+
 public class Admin {
 	final int width = 900;
-	final int height = 800;
+	final int height = 550;
 	
 	private JFrame mainFrame;
 	private JPanel totalTable, headerTable, staffTable;
 	private JScrollPane containTable;
 	private List<JLabel> item = new ArrayList<JLabel>(50);
-	private ArrayList<List<JLabel>> personLeave = new ArrayList<List<JLabel>>(50);
-	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>(50);
+	private ArrayList<List<JLabel>> personLeave = new ArrayList<List<JLabel>>();
+	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>();
 	
 	public Admin(String title) {
 		// Run
@@ -49,22 +51,22 @@ public class Admin {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(csvpath));
-//          reader.readLine();// ¬O§_Åª¨ú²Ä¤@¦æ (¥[¤Wµù¸Ñ¥Nªí·|Åª¨ú,µù¸Ñ®³±¼¤£·|Åª¨ú)
-			String line = null;// ¼È¦s¥Î(´ú¸Õ¬O§_¤wÅª§¹ÀÉ)
+//          reader.readLine();// æ˜¯å¦è®€å–ç¬¬ä¸€è¡Œ (åŠ ä¸Šè¨»è§£ä»£è¡¨æœƒè®€å–,è¨»è§£æ‹¿æ‰ä¸æœƒè®€å–)
+			String line = null;// æš«å­˜ç”¨(æ¸¬è©¦æ˜¯å¦å·²è®€å®Œæª”)
 			
 			 // read data
             while ((line = reader.readLine()) != null) {
                 
-                //¦s©ñ¨C¤@¦C¸ê®Æ¤º®e(¾îªº)
+                //å­˜æ”¾æ¯ä¸€åˆ—è³‡æ–™å…§å®¹(æ©«çš„)
                 ArrayList<String> ticketStr = new ArrayList<String>();
                 
-                String[] item = line.split(",");//csv¤å¥ó¬°¨Ì¾Ú³r¸¹¤Á³Î
+                String[] item = line.split(",");//csvæ–‡ä»¶ç‚ºä¾æ“šé€—è™Ÿåˆ‡å‰²
                 
-                //²M°£¤W¤@¦¸¦s¤Jªº¸ê®Æ
+                //æ¸…é™¤ä¸Šä¸€æ¬¡å­˜å…¥çš„è³‡æ–™
                 ticketStr.clear();
                 
                 //System.out.println(item.length);
-                //ÅªÀÉ(³æ¦C¸ê®Æ)
+                //è®€æª”(å–®åˆ—è³‡æ–™)
                 for(int i = 0; i < item.length; i++){
                     
                     ticketStr.add(item[i]);
@@ -90,7 +92,7 @@ public class Admin {
 	}
 	
 	public void filledEmptySpace(ArrayList<List<String>> inputTable) {
-		int maxSize = inputTable.get(0).size();
+		maxSize = inputTable.get(0).size();
 		boolean reRun = false;
 		
 		for (int i = 1; i < inputTable.size(); i++) {
@@ -101,9 +103,11 @@ public class Admin {
 					inputTable.get(i).add("");
 				}				
 			}
+			
+			// If the i_th row is larger than the first row, fill the first row.
 			else if (inputTable.get(i).size() > maxSize) {
 				for (int j = maxSize; j < inputTable.get(i).size(); j++) {
-					inputTable.get(0).add("");
+					inputTable.get(0).add("Missing");
 				}
 				
 				maxSize = inputTable.get(i).size();
@@ -144,7 +148,7 @@ public class Admin {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Admin ad = new Admin("½Ğ°²ºŞ²z¨t²Î");
+		Admin ad = new Admin("è«‹å‡ç®¡ç†ç³»çµ±");
 		ad.launchFrame();
 
 	}
