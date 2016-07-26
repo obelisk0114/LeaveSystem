@@ -19,8 +19,6 @@ import java.awt.GridLayout;
 import java.util.List;
 import java.util.ArrayList;
 
-int maxSize = -1;
-
 public class Admin {
 	final int width = 900;
 	final int height = 550;
@@ -31,6 +29,8 @@ public class Admin {
 	private List<JLabel> item = new ArrayList<JLabel>(50);
 	private ArrayList<List<JLabel>> personLeave = new ArrayList<List<JLabel>>();
 	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>();
+	
+	int maxSize = -1;
 	
 	public Admin(String title) {
 		// Run
