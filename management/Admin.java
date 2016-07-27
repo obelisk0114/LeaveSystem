@@ -22,6 +22,8 @@ import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Font;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -41,8 +43,6 @@ public class Admin {
 	private JMenuItem openMenuItem, saveMenuItem, helpMenuItem;
 	
 	int tag = -1;
-	int maxSize = -1;
-	
 	int maxSize = -1;
 	
 	public Admin(String title) {
@@ -155,21 +155,23 @@ public class Admin {
 	}
 	
 	public void setTable(ArrayList<List<String>> inputTable) {
+		boolean firstTag = false;
 		for (int i = 0; i < inputTable.get(0).size(); i++) {
 			String element = inputTable.get(0).get(i);
 			if (element.equals(null)) {
 				element = "";
 			}
 			
-			if (element.contains("°²")) {
+			if (element.contains("°²") && firstTag == false) {
 				tag = i;
+				firstTag = true;
 			}
 			
 			item.add(new JLabel(element, SwingConstants.CENTER));
 		}
 		
 		for (int i = 1; i < inputTable.size(); i++) {
-			personName.add(new JLabel(inputTable.get(i).get(0)));
+			personName.add(new JLabel(inputTable.get(i).get(0), SwingConstants.CENTER));
 			
 			List<JButton> personLeaveRow = new ArrayList<JButton>();
 			List<JButton> personRow = new ArrayList<JButton>(31);
@@ -195,7 +197,9 @@ public class Admin {
 	
 	public void paintTable(ArrayList<List<String>> inputTable) {
 		frameTable.setLayout(new GridBagLayout());
-		int gridRecord = 2;
+		Font font = new Font("Serif", Font.BOLD, 15);
+		int gridRecordX = 1;
+		int gridRecordY = 2;
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.insets = new Insets(0,0,0,0);
@@ -204,17 +208,18 @@ public class Admin {
 		gbc.weightx = 1;
 		gbc.weighty = 1;
 		if (item.get(0).equals("")) {
-			gbc.ipadx = 10;
-			gbc.ipady = 10;
-			gbc.gridwidth = gridRecord;
-		    gbc.gridheight = gridRecord;
-		}
-		else {
-			gridRecord = 2;
 			gbc.ipadx = 20;
 			gbc.ipady = 20;
-			gbc.gridwidth = gridRecord;
-		    gbc.gridheight = gridRecord;
+			gbc.gridwidth = gridRecordX;
+		    gbc.gridheight = gridRecordY;
+		}
+		else {
+			gridRecordX = 2;
+			gridRecordY = 4;
+			gbc.ipadx = 40;
+			gbc.ipady = 40;
+			gbc.gridwidth = gridRecordX;
+		    gbc.gridheight = gridRecordY;
 		}
 		frameTable.add(item.get(0), gbc);
 		item.get(0).setVisible(true);
@@ -224,10 +229,12 @@ public class Admin {
 			gbc.weighty = 1;
 			gbc.gridwidth = 2;
 			gbc.gridheight = 2;
-			gbc.ipadx = 20;
-			gbc.ipady = 20;
-			gbc.gridx = gridRecord + (i - 1) * 2;
+			gbc.ipadx = 40;
+			gbc.ipady = 40;
+			gbc.gridx = gridRecordX + (i - 1) * 2;
 			gbc.gridy = 0;
+			
+			item.get(i).setFont(font);
 			frameTable.add(item.get(i), gbc);
 			item.get(i).setVisible(true);
 		}
@@ -237,10 +244,12 @@ public class Admin {
 			gbc.weighty = 1;
 			gbc.gridwidth = 2;
 			gbc.gridheight = 2;
-			gbc.ipadx = 20;
-			gbc.ipady = 20;
+			gbc.ipadx = 40;
+			gbc.ipady = 40;
 			gbc.gridx = 0;
-			gbc.gridy = gridRecord + i * 2;
+			gbc.gridy = gridRecordY + i * 2;
+			
+			personName.get(i).setFont(font);
 		    frameTable.add(personName.get(i), gbc);
 		    personName.get(i).setVisible(true);
 		}
@@ -261,10 +270,12 @@ public class Admin {
 				gbc.weighty = 1;
 				gbc.gridwidth = 2;
 				gbc.gridheight = 2;
-				gbc.ipadx = 20;
-				gbc.ipady = 20;
-				gbc.gridx = gridRecord + j * 2;
-				gbc.gridy = gridRecord + i * 2;
+				gbc.ipadx = 40;
+				gbc.ipady = 40;
+				gbc.gridx = gridRecordX + j * 2;
+				gbc.gridy = gridRecordY + i * 2;
+				
+				person.get(i).get(j).setFont(font);
 			    frameTable.add(person.get(i).get(j), gbc);
 			    person.get(i).get(j).setVisible(true);
 				//person.get(i).get(j).addActionListener(l);
@@ -278,10 +289,12 @@ public class Admin {
 					gbc.weighty = 1;
 					gbc.gridwidth = 2;
 					gbc.gridheight = 2;
-					gbc.ipadx = 20;
-					gbc.ipady = 20;
-					gbc.gridx = gridRecord + (j + tag - 1) * 2;
-					gbc.gridy = gridRecord + i * 2;
+					gbc.ipadx = 40;
+					gbc.ipady = 40;
+					gbc.gridx = gridRecordX + (j + tag - 1) * 2;
+					gbc.gridy = gridRecordY + i * 2;
+					
+					personLeave.get(i).get(j).setFont(font);
 				    frameTable.add(personLeave.get(i).get(j), gbc);
 				    personLeave.get(i).get(j).setEnabled(false);
 				    personLeave.get(i).get(j).setVisible(true);
