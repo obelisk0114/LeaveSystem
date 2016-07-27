@@ -23,7 +23,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Font;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -34,6 +33,7 @@ public class Admin {
 	private JFrame mainFrame;
 	private JPanel frameTable;
 	private JScrollPane containTable;
+	private JPopupMenu popupMenu;
 	private List<JLabel> item = new ArrayList<JLabel>(50);
 	private List<JLabel> personName = new ArrayList<JLabel>();
 	private ArrayList<List<JButton>> personLeave = new ArrayList<List<JButton>>();
@@ -65,7 +65,7 @@ public class Admin {
 				public void actionPerformed(ActionEvent e) {
 					JOptionPane.showOptionDialog(null, "簡介:\n    "
 						+ "請將 excel 存成 csv 檔案再開啟\n"
-						+ "路徑範例:\n    C:/Users/LHC/Desktop/test.csv", 
+						+ "路徑範例:\n    C:/Users/U2/Desktop/test.csv", 
 						"關於  -- by obelisk0114", JOptionPane.DEFAULT_OPTION,
 						JOptionPane.INFORMATION_MESSAGE, null, null, null);
 					}
@@ -73,10 +73,7 @@ public class Admin {
 				);
 		
 		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
-		ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
-		filledEmptySpace(dataTable);
-		setTable(dataTable);
-		paintTable(dataTable);
+		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
@@ -114,9 +111,13 @@ public class Admin {
             reader.close();
 			
 		} catch (FileNotFoundException fe) {
-			fe.printStackTrace();
+			JOptionPane.showMessageDialog(null, 
+				"The system cannot find the path specified.", "Warning", 
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException ie) {
 			ie.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		// print table for test
@@ -171,7 +172,8 @@ public class Admin {
 		}
 		
 		for (int i = 1; i < inputTable.size(); i++) {
-			personName.add(new JLabel(inputTable.get(i).get(0), SwingConstants.CENTER));
+			personName.add(new JLabel(inputTable.get(i).get(0), 
+					SwingConstants.CENTER));
 			
 			List<JButton> personLeaveRow = new ArrayList<JButton>();
 			List<JButton> personRow = new ArrayList<JButton>(31);
@@ -208,16 +210,16 @@ public class Admin {
 		gbc.weightx = 1;
 		gbc.weighty = 1;
 		if (item.get(0).equals("")) {
-			gbc.ipadx = 20;
-			gbc.ipady = 20;
+			gbc.ipadx = 10;
+			gbc.ipady = 10;
 			gbc.gridwidth = gridRecordX;
 		    gbc.gridheight = gridRecordY;
 		}
 		else {
 			gridRecordX = 2;
 			gridRecordY = 4;
-			gbc.ipadx = 40;
-			gbc.ipady = 40;
+			gbc.ipadx = 10;
+			gbc.ipady = 10;
 			gbc.gridwidth = gridRecordX;
 		    gbc.gridheight = gridRecordY;
 		}
@@ -229,8 +231,8 @@ public class Admin {
 			gbc.weighty = 1;
 			gbc.gridwidth = 2;
 			gbc.gridheight = 2;
-			gbc.ipadx = 40;
-			gbc.ipady = 40;
+			gbc.ipadx = 10;
+			gbc.ipady = 10;
 			gbc.gridx = gridRecordX + (i - 1) * 2;
 			gbc.gridy = 0;
 			
@@ -244,8 +246,8 @@ public class Admin {
 			gbc.weighty = 1;
 			gbc.gridwidth = 2;
 			gbc.gridheight = 2;
-			gbc.ipadx = 40;
-			gbc.ipady = 40;
+			gbc.ipadx = 10;
+			gbc.ipady = 10;
 			gbc.gridx = 0;
 			gbc.gridy = gridRecordY + i * 2;
 			
@@ -270,8 +272,8 @@ public class Admin {
 				gbc.weighty = 1;
 				gbc.gridwidth = 2;
 				gbc.gridheight = 2;
-				gbc.ipadx = 40;
-				gbc.ipady = 40;
+				gbc.ipadx = 10;
+				gbc.ipady = 10;
 				gbc.gridx = gridRecordX + j * 2;
 				gbc.gridy = gridRecordY + i * 2;
 				
@@ -289,8 +291,8 @@ public class Admin {
 					gbc.weighty = 1;
 					gbc.gridwidth = 2;
 					gbc.gridheight = 2;
-					gbc.ipadx = 40;
-					gbc.ipady = 40;
+					gbc.ipadx = 10;
+					gbc.ipady = 10;
 					gbc.gridx = gridRecordX + (j + tag - 1) * 2;
 					gbc.gridy = gridRecordY + i * 2;
 					
@@ -305,7 +307,23 @@ public class Admin {
 	
 	private class fileSystem implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
-			//
+			String menuString = ae.getActionCommand();
+			if (menuString.equals("Open")) {
+				String csvPath = JOptionPane.showInputDialog(mainFrame, 
+					"Enter your csv path, ex :", "C:/Users/U2/Desktop/test.csv");
+				if (csvPath == null) {
+					return;
+				}
+				ArrayList<List<String>> dataTable = readCSVToArrayList(csvPath);
+				try {					
+					filledEmptySpace(dataTable);
+					setTable(dataTable);
+					paintTable(dataTable);
+				} catch(Exception e) {
+					return;
+				}
+				mainFrame.setVisible(true);
+			}
 		}
 	}
 	
