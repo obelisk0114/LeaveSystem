@@ -2,13 +2,9 @@ package management;
 
 /*
  * http://m.blog.csdn.net/article/details?id=51372613
- * https://community.oracle.com/thread/1356578?start=0&tstart=0
  * http://stackoverflow.com/questions/17059575/how-to-change-the-font-in-joptionpane-showinputdialog-jtextfield
- * http://yhhuang1966.blogspot.tw/2014/05/jframe.html
  * 
- * http://stackoverflow.com/questions/27318130/changing-a-jmenubars-font
- * 
- * ¥[ BufferedWriter
+ * åŠ  BufferedWriter
  * http://stackoverflow.com/questions/12350248/java-difference-between-filewriter-and-bufferedwriter
  * http://stackoverflow.com/questions/30073980/java-writing-strings-to-a-csv-file
  * http://www.cnblogs.com/leihupqrst/p/3508410.html
@@ -81,10 +77,10 @@ public class Admin {
 		helpMenuItem.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					JOptionPane.showOptionDialog(null, "Â²¤¶:\n    "
-						+ "½Ğ±N excel ¦s¦¨ csv ÀÉ®×¦A¶}±Ò\n"
-						+ "¸ô®|½d¨Ò:\n    C:/Users/U2/Desktop/test.csv", 
-						"Ãö©ó  -- by obelisk0114", JOptionPane.DEFAULT_OPTION,
+					JOptionPane.showOptionDialog(null, "ç°¡ä»‹:\n    "
+						+ "è«‹å°‡ excel å­˜æˆ csv æª”æ¡ˆå†é–‹å•Ÿ\n"
+						+ "è·¯å¾‘ç¯„ä¾‹:\n    C:/Users/U2/Desktop/test.csv", 
+						"é—œæ–¼  -- by obelisk0114", JOptionPane.DEFAULT_OPTION,
 						JOptionPane.INFORMATION_MESSAGE, null, null, null);
 					}
 				}
@@ -100,18 +96,18 @@ public class Admin {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(csvpath));
-//          reader.readLine();// ¬O§_Åª¨ú²Ä¤@¦æ (¥[¤Wµù¸Ñ¥Nªí·|Åª¨ú,µù¸Ñ®³±¼¤£·|Åª¨ú)
-			String line = null;// ¼È¦s¥Î(´ú¸Õ¬O§_¤wÅª§¹ÀÉ)
+//          reader.readLine();// æ˜¯å¦è®€å–ç¬¬ä¸€è¡Œ (åŠ ä¸Šè¨»è§£ä»£è¡¨æœƒè®€å–,è¨»è§£æ‹¿æ‰ä¸æœƒè®€å–)
+			String line = null;// æš«å­˜ç”¨(æ¸¬è©¦æ˜¯å¦å·²è®€å®Œæª”)
 			
 			 // read data
             while ((line = reader.readLine()) != null) {
                 
-                //¦s©ñ¨C¤@¦C¸ê®Æ¤º®e(¾îªº)
+                //å­˜æ”¾æ¯ä¸€åˆ—è³‡æ–™å…§å®¹(æ©«çš„)
                 ArrayList<String> ticketStr = new ArrayList<String>();
                 
-                String[] item = line.split(",");//csv¤å¥ó¬°¨Ì¾Ú³r¸¹¤Á³Î
+                String[] item = line.split(",");//csvæ–‡ä»¶ç‚ºä¾æ“šé€—è™Ÿåˆ‡å‰²
                 
-                //²M°£¤W¤@¦¸¦s¤Jªº¸ê®Æ
+                //æ¸…é™¤ä¸Šä¸€æ¬¡å­˜å…¥çš„è³‡æ–™
                 ticketStr.clear();
                 
                 //System.out.println(item.length);
@@ -181,7 +177,7 @@ public class Admin {
 				element = "";
 			}
 			
-			if (element.contains("°²") && firstTag == false) {
+			if (element.contains("å‡") && firstTag == false) {
 				tag = i;
 				firstTag = true;
 			}
@@ -375,7 +371,7 @@ public class Admin {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Admin ad = new Admin("½Ğ°²ºŞ²z¨t²Î");
+		Admin ad = new Admin("è«‹å‡ç®¡ç†ç³»çµ±");
 		ad.launchFrame();
 
 	}
