@@ -1,5 +1,23 @@
 package management;
 
+/*
+ * http://m.blog.csdn.net/article/details?id=51372613
+ * https://community.oracle.com/thread/1356578?start=0&tstart=0
+ * http://stackoverflow.com/questions/17059575/how-to-change-the-font-in-joptionpane-showinputdialog-jtextfield
+ * http://yhhuang1966.blogspot.tw/2014/05/jframe.html
+ * 
+ * http://stackoverflow.com/questions/27318130/changing-a-jmenubars-font
+ * 
+ * ¥[ BufferedWriter
+ * http://stackoverflow.com/questions/12350248/java-difference-between-filewriter-and-bufferedwriter
+ * http://stackoverflow.com/questions/30073980/java-writing-strings-to-a-csv-file
+ * http://www.cnblogs.com/leihupqrst/p/3508410.html
+ * 
+ * http://jerry17768java.blogspot.tw/2012/06/java-ioreadwritecopy.html
+ * http://blog.johnsonlu.org/java%E8%AE%80%E5%8F%96%E8%88%87%E5%AF%AB%E5%85%A5%E6%AA%94%E6%A1%88/
+ * https://www.javaworld.com.tw/jute/post/view?bid=29&id=267500
+ */
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
