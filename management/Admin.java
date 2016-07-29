@@ -1,8 +1,10 @@
 package management;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -15,6 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.SwingConstants;
 
 import java.awt.event.ActionEvent;
@@ -23,8 +27,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Font;
+
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Admin {
 	final int width = 900;
@@ -39,8 +46,11 @@ public class Admin {
 	private ArrayList<List<JButton>> personLeave = new ArrayList<List<JButton>>();
 	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>();
 	private JMenuBar menuBar;
-	private JMenu modeMenu, helpMenu;
-	private JMenuItem openMenuItem, saveMenuItem, helpMenuItem;
+	private JMenu modeMenu, helpMenu, functionMenu;
+	private JMenuItem openMenuItem, saveMenuItem, updatefunction, helpMenuItem;
+	
+	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	
 	int tag = -1;
 	int maxSize = -1;
@@ -51,20 +61,44 @@ public class Admin {
 		frameTable = new JPanel();
 		containTable = new JScrollPane(frameTable); 
 		
+		UIManager.put("OptionPane.messageFont", paneFont);
+		UIManager.put("OptionPane.buttonFont", paneFont);
+		
 		menuBar = new JMenuBar();
 		modeMenu = new JMenu("File");
+		modeMenu.setFont(labelFont);
+		functionMenu = new JMenu("Function");
+		functionMenu.setFont(labelFont);
 		helpMenu = new JMenu("Help");
-		fileSystem fileControl = new fileSystem();
+		helpMenu.setFont(labelFont);
+		OpenFile openfile = new OpenFile();
+		SaveFile savefile = new SaveFile();
 		openMenuItem = new JMenuItem("Open");
-		openMenuItem.addActionListener(fileControl);
+		openMenuItem.setFont(labelFont);
+		openMenuItem.addActionListener(openfile);
 		saveMenuItem = new JMenuItem("Save");
-		saveMenuItem.addActionListener(fileControl);
+		saveMenuItem.setFont(labelFont);
+		saveMenuItem.addActionListener(savefile);
+		updatefunction = new JMenuItem("Update");
+		updatefunction.setFont(labelFont);
+		updatefunction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (personName.isEmpty()) {
+					JOptionPane.showMessageDialog(null, 
+						"There is no file can be updated", "Warning", 
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				updatePersonLeave();
+			}
+		});
 		helpMenuItem = new JMenuItem("About");
+		helpMenuItem.setFont(labelFont);
 		helpMenuItem.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					JOptionPane.showOptionDialog(null, "簡介:\n    "
-						+ "請將 excel 存成 csv 檔案再開啟\n"
+						+ "請將 excel 存成 csv 檔案再開啟\n    使用路徑 + 檔名.csv\n"
 						+ "路徑範例:\n    C:/Users/U2/Desktop/test.csv", 
 						"關於  -- by obelisk0114", JOptionPane.DEFAULT_OPTION,
 						JOptionPane.INFORMATION_MESSAGE, null, null, null);
@@ -82,16 +116,16 @@ public class Admin {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(csvpath));
-//          reader.readLine();// 是否讀取第一行 (加上註解代表會讀取,註解拿掉不會讀取)
-			String line = null;// 暫存用(測試是否已讀完檔)
+         // reader.readLine(); If you don't want to save the first row, add this line.
+			String line = null;  // 暫存用(測試是否已讀完檔)
 			
-			 // read data
+			 // 讀取資料, 當讀完最後一行時, 再讀取就會傳回 null
             while ((line = reader.readLine()) != null) {
                 
                 //存放每一列資料內容(橫的)
                 ArrayList<String> ticketStr = new ArrayList<String>();
                 
-                String[] item = line.split(",");//csv文件為依據逗號切割
+                String[] item = line.split(",");  //csv文件為依據逗號切割
                 
                 //清除上一次存入的資料
                 ticketStr.clear();
@@ -305,24 +339,81 @@ public class Admin {
 		}
 	}
 	
-	private class fileSystem implements ActionListener {
+	public void updatePersonLeave() {				
+		for (int i = 0; i < person.size(); i++) {
+			Map<String, Integer> leaveMap = new HashMap<String, Integer>();
+			
+			for (int j = 0; j < person.get(i).size(); j++) {
+				String leaveItem = person.get(i).get(j).getText();
+				
+				if (leaveItem != "") {	
+					if (leaveMap.containsKey(leaveItem)) {
+						Integer newValue = leaveMap.get(leaveItem);
+						leaveMap.put(leaveItem, newValue + 1);
+					}
+					else {
+						leaveMap.put(leaveItem, 1);
+					}
+				}
+			}
+			
+			for (int k = 0; k < item.size() - tag; k++) {
+				if (leaveMap.containsKey(item.get(k + tag).getText())) {
+					int leaveValue = leaveMap.get(item.get(k + tag).getText());
+					personLeave.get(i).get(k).setText(leaveValue + "");
+				}
+				else {
+					personLeave.get(i).get(k).setText("");
+				}
+			}
+		}
+	}
+	
+	private class OpenFile implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
-			String menuString = ae.getActionCommand();
-			if (menuString.equals("Open")) {
-				String csvPath = JOptionPane.showInputDialog(mainFrame, 
-					"Enter your csv path, ex :", "C:/Users/U2/Desktop/test.csv");
-				if (csvPath == null) {
+			if (!personName.isEmpty()) {
+				int option = JOptionPane.showConfirmDialog(mainFrame, 
+					"Do you want to save the file ?",
+					"Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+				if (option == 2 || option == -1) {
 					return;
 				}
-				ArrayList<List<String>> dataTable = readCSVToArrayList(csvPath);
-				try {					
-					filledEmptySpace(dataTable);
-					setTable(dataTable);
-					paintTable(dataTable);
-				} catch(Exception e) {
-					return;
+				else if (option == 0) {					
+					SaveFile savefile = new SaveFile();
+					savefile.actionPerformed(ae);
 				}
-				mainFrame.setVisible(true);
+			}
+			String csvPath = JOptionPane
+					.showInputDialog(mainFrame, "Enter your csv path, ex :",
+						"C:/Users/U2/Desktop/test.csv");
+			if (csvPath == null) {
+				return;
+			}
+			ArrayList<List<String>> dataTable = readCSVToArrayList(csvPath);
+			try {
+				filledEmptySpace(dataTable);
+				setTable(dataTable);
+				paintTable(dataTable);
+			} catch (Exception e) {
+				return;
+			}
+			mainFrame.setVisible(true);
+		}
+	}
+	
+	private class SaveFile implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			if (personName.isEmpty()) {
+				JOptionPane.showMessageDialog(null, 
+					"There is no file can be saved", "Warning", 
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			String csvPath = JOptionPane.showInputDialog(mainFrame, 
+				"Enter the path that you want to save the file, ex :",
+					"C:/Users/U2/Desktop/test.csv");
+			if (csvPath == null) {
+				return;
 			}
 		}
 	}
@@ -331,9 +422,11 @@ public class Admin {
 		mainFrame.setSize(width, height);
 		mainFrame.add(menuBar);
 		menuBar.add(modeMenu);
+		menuBar.add(functionMenu);
 		menuBar.add(helpMenu);
 		modeMenu.add(openMenuItem);
 		modeMenu.add(saveMenuItem);
+		functionMenu.add(updatefunction);
 		helpMenu.add(helpMenuItem);
 		
 		mainFrame.add(containTable);
