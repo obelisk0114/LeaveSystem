@@ -20,9 +20,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -30,6 +33,9 @@ import java.awt.Font;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -47,7 +53,9 @@ public class Admin {
 	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>();
 	private JMenuBar menuBar;
 	private JMenu modeMenu, helpMenu, functionMenu;
-	private JMenuItem openMenuItem, saveMenuItem, updatefunction, helpMenuItem;
+	private JMenuItem openMenuItem, saveMenuItem;
+	private JMenuItem updatefunction, findRepeatfunction, checkfunction;
+	private JMenuItem helpMenuItem;
 	
 	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
@@ -56,7 +64,6 @@ public class Admin {
 	int maxSize = -1;
 	
 	public Admin(String title) {
-		// Run
 		mainFrame = new JFrame(title);
 		frameTable = new JPanel();
 		containTable = new JScrollPane(frameTable); 
@@ -79,6 +86,7 @@ public class Admin {
 		saveMenuItem = new JMenuItem("Save");
 		saveMenuItem.setFont(labelFont);
 		saveMenuItem.addActionListener(savefile);
+		
 		updatefunction = new JMenuItem("Update");
 		updatefunction.setFont(labelFont);
 		updatefunction.addActionListener(new ActionListener() {
@@ -92,6 +100,37 @@ public class Admin {
 				updatePersonLeave();
 			}
 		});
+		findRepeatfunction = new JMenuItem("Find repeat");
+		findRepeatfunction.setFont(labelFont);
+		findRepeatfunction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (personName.isEmpty()) {
+					JOptionPane.showMessageDialog(null, 
+						"There is no file can be found", "Warning", 
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if (findRepeat()) {
+					JOptionPane.showMessageDialog(null, 
+							"There are duplicated labels.", "Warning", 
+								JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		});
+		checkfunction = new JMenuItem("Check");
+		checkfunction.setFont(labelFont);
+		checkfunction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (personName.isEmpty()) {
+					JOptionPane.showMessageDialog(null, 
+						"There is no file can be checked", "Warning", 
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				checkLeave();
+			}
+		});
+		
 		helpMenuItem = new JMenuItem("About");
 		helpMenuItem.setFont(labelFont);
 		helpMenuItem.addActionListener(
@@ -133,10 +172,7 @@ public class Admin {
                 //System.out.println(item.length);
                 // Read file (single data)
                 for(int i = 0; i < item.length; i++){
-                    
                     ticketStr.add(item[i]);
-                    
-//                  System.out.println(ticketStr.get(i));
                 }
                 
                 Table.add(ticketStr);
@@ -193,7 +229,7 @@ public class Admin {
 		boolean firstTag = false;
 		for (int i = 0; i < inputTable.get(0).size(); i++) {
 			String element = inputTable.get(0).get(i);
-			if (element.equals(null)) {
+			if (element == null) {
 				element = "";
 			}
 			
@@ -214,7 +250,7 @@ public class Admin {
 			
 			for (int j = 1; j < inputTable.get(i).size(); j++) {
 				String tempLeaveData = inputTable.get(i).get(j);
-				if (tempLeaveData.equals(null)) {
+				if (tempLeaveData == null) {
 					tempLeaveData = "";
 				}
 				
@@ -300,6 +336,7 @@ public class Admin {
 		System.out.println("maxSize : " + maxSize);
 		System.out.println("controlSize : " + controlSize);
 		
+		buttonPop popup = new buttonPop();
 		for (int i = 0; i < inputTable.size() - 1; i++) {
 			for (int j = 0; j < controlSize - 1; j++) {
 				gbc.weightx = 1;
@@ -314,7 +351,7 @@ public class Admin {
 				person.get(i).get(j).setFont(font);
 			    frameTable.add(person.get(i).get(j), gbc);
 			    person.get(i).get(j).setVisible(true);
-				//person.get(i).get(j).addActionListener(l);
+				person.get(i).get(j).addMouseListener(popup);
 			}
 		}
 
@@ -339,25 +376,87 @@ public class Admin {
 		}
 	}
 	
-	public void updatePersonLeave() {				
-		for (int i = 0; i < person.size(); i++) {
-			Map<String, Integer> leaveMap = new HashMap<String, Integer>();
+	public Map<String, Integer> leaveCount(List<JButton> inputList) {
+		Map<String, Integer> leaveMap = new HashMap<String, Integer>();
+		
+		for (JButton element : inputList) {
+			String leaveItem = element.getText();
 			
-			for (int j = 0; j < person.get(i).size(); j++) {
-				String leaveItem = person.get(i).get(j).getText();
-				
-				if (leaveItem != "") {	
-					if (leaveMap.containsKey(leaveItem)) {
-						Integer newValue = leaveMap.get(leaveItem);
-						leaveMap.put(leaveItem, newValue + 1);
-					}
-					else {
-						leaveMap.put(leaveItem, 1);
+			if (!leaveItem.equals("")) {
+				if (leaveMap.containsKey(leaveItem)) {
+					Integer newValue = leaveMap.get(leaveItem);
+					leaveMap.put(leaveItem, newValue + 1);
+				}
+				else {
+					leaveMap.put(leaveItem, 1);
+				}
+			}
+		}
+		
+		return leaveMap;
+	}
+	
+	public boolean checkLeave() {
+		boolean check = true;
+		Set<String> missList = new HashSet<String>(); 
+		
+		for (List<JButton> elementpack : person) {
+			for (JButton element : elementpack) {
+				String elementString = element.getText(); 
+				if (!elementString.equals("")) {
+					for (int k = tag; k < item.size(); k++) {
+						if (item.get(k).getText().equals(elementString)) {
+							break;
+						}
+						if (k == item.size() - 1) {
+							check = false;
+							missList.add(elementString);
+						}
 					}
 				}
 			}
+		}
+		
+		String display = "";
+		if (missList.size() != 0) {
+			for (String element : missList) {
+				display = display + element + " ";
+			}
+		}
+		
+		JOptionPane.showMessageDialog(null, 
+				"You miss folowing items.\n" + display, "Warning", 
+					JOptionPane.WARNING_MESSAGE);
+		
+		return check;
+	}
+	
+	public boolean findRepeat() {
+		Set<String> repeatList = new HashSet<String>();
+		
+		for (int i = tag; i < item.size(); i++) {
+			repeatList.add(item.get(i).getText());
+		}
+		
+		if (repeatList.size() == (item.size() - tag)) {
+			return false;
+		}
+		else
+			return true;
+	}
+	
+	public void updatePersonLeave() {				
+		for (int i = 0; i < person.size(); i++) {
+			Map<String, Integer> leaveMap = leaveCount(person.get(i));
 			
 			for (int k = 0; k < item.size() - tag; k++) {
+				if (leaveMap.size() > item.size() - tag) {
+					JOptionPane.showMessageDialog(null, 
+						"You miss some item. Use check function.", 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				
 				if (leaveMap.containsKey(item.get(k + tag).getText())) {
 					int leaveValue = leaveMap.get(item.get(k + tag).getText());
 					personLeave.get(i).get(k).setText(leaveValue + "");
@@ -366,6 +465,39 @@ public class Admin {
 					personLeave.get(i).get(k).setText("");
 				}
 			}
+		}
+	}
+	
+	private class buttonPop extends MouseAdapter {
+		public void mousePressed(MouseEvent me) {
+			if (SwingUtilities.isRightMouseButton(me)) {
+				popupMenu = new JPopupMenu();
+				Font popupfont = new Font("Serif", Font.BOLD, 15);
+				LinkedList<JMenuItem> popupItem = new LinkedList<JMenuItem>();
+				PopupSelect select = new PopupSelect();
+				for (int i = tag; i < item.size(); i++) {
+					JMenuItem tmpItem = new JMenuItem(item.get(i).getText());
+					tmpItem.setFont(popupfont);
+					tmpItem.addActionListener(select);
+					popupItem.add(tmpItem);
+				}
+				
+				while (!popupItem.isEmpty()) {
+					popupMenu.add(popupItem.removeFirst());
+					if (!popupItem.isEmpty()) {						
+						popupMenu.addSeparator();
+					}
+				}
+				
+				popupMenu.show(me.getComponent(), me.getX(), me.getY());
+			}
+		}
+	}
+	
+	private class PopupSelect implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			String selectItem = ae.getActionCommand();
+			System.out.println(selectItem);
 		}
 	}
 	
@@ -415,6 +547,19 @@ public class Admin {
 			if (csvPath == null) {
 				return;
 			}
+			
+			try {
+				FileWriter fw = new FileWriter(csvPath);
+				BufferedWriter bw = new BufferedWriter(fw);
+			} catch (FileNotFoundException fe) {
+				JOptionPane.showMessageDialog(null,
+						"The system cannot find the path specified.",
+						"Warning", JOptionPane.ERROR_MESSAGE);
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -427,6 +572,8 @@ public class Admin {
 		modeMenu.add(openMenuItem);
 		modeMenu.add(saveMenuItem);
 		functionMenu.add(updatefunction);
+		functionMenu.add(findRepeatfunction);
+		functionMenu.add(checkfunction);
 		helpMenu.add(helpMenuItem);
 		
 		mainFrame.add(containTable);
