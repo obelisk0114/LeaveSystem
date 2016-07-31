@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -61,8 +61,9 @@ public class Admin {
 	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	
-	int tag = -1;
-	int maxSize = -1;
+	int tag = -1;  // Record the first position of "°²"
+	int maxSize = -1;  // Record the maximum row size
+	boolean reRead = false;  // Record whether user first open. 
 	
 	public Admin(String title) {
 		mainFrame = new JFrame(title);
@@ -116,6 +117,10 @@ public class Admin {
 							"There are duplicated labels.", "Warning", 
 								JOptionPane.WARNING_MESSAGE);
 				}
+				else
+					JOptionPane.showMessageDialog(null, 
+							"No duplicated labels.", "Information", 
+								JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		checkfunction = new JMenuItem("Check");
@@ -147,7 +152,7 @@ public class Admin {
 				);
 		
 		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
-		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/15T-J000/Desktop/test.csv");
+		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Downloads/test.csv");
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
@@ -197,6 +202,7 @@ public class Admin {
 		return Table;
 	}
 	
+	// Fill all of the row to the same length and make the table become a rectangular type 
 	public void filledEmptySpace(ArrayList<List<String>> inputTable) {
 		maxSize = inputTable.get(0).size();
 		boolean reRun = false;
@@ -226,8 +232,20 @@ public class Admin {
 			filledEmptySpace(inputTable);
 	}
 	
-	public void setTable(ArrayList<List<String>> inputTable) {
+	// Split and save inputTable to item, personName, person, personLeave
+	public boolean setTable(ArrayList<List<String>> inputTable) {
 		boolean firstTag = false;
+		if (reRead == true) {
+			item.clear();
+			item = new ArrayList<JLabel>(50);
+			personName.clear();
+			personName = new ArrayList<JLabel>();
+			person.clear();
+			person = new ArrayList<List<JButton>>();
+			personLeave.clear();
+			personLeave = new ArrayList<List<JButton>>();
+		}
+		
 		for (int i = 0; i < inputTable.get(0).size(); i++) {
 			String element = inputTable.get(0).get(i);
 			if (element == null) {
@@ -239,12 +257,11 @@ public class Admin {
 				firstTag = true;
 			}
 			
-			item.add(new JLabel(element, SwingConstants.CENTER));
+			item.add(new JLabel(element, SwingConstants.CENTER));				
 		}
 		
 		for (int i = 1; i < inputTable.size(); i++) {
-			personName.add(new JLabel(inputTable.get(i).get(0), 
-					SwingConstants.CENTER));
+			personName.add(new JLabel(inputTable.get(i).get(0), SwingConstants.CENTER));
 			
 			List<JButton> personLeaveRow = new ArrayList<JButton>();
 			List<JButton> personRow = new ArrayList<JButton>(31);
@@ -265,10 +282,19 @@ public class Admin {
 			
 			personLeave.add(personLeaveRow);
 			person.add(personRow);
+			
 		}
+		
+		boolean repaintState = false;
+		if (reRead == true)
+			repaintState = true;
+		
+		reRead = true;
+		return repaintState;
 	}
 	
 	public void paintTable(ArrayList<List<String>> inputTable) {
+		frameTable.removeAll();
 		frameTable.setLayout(new GridBagLayout());
 		Font font = new Font("Serif", Font.BOLD, 15);
 		int gridRecordX = 1;
@@ -377,6 +403,7 @@ public class Admin {
 		}
 	}
 	
+	// Return a person's each sum of each items
 	public Map<String, Integer> leaveCount(List<JButton> inputList) {
 		Map<String, Integer> leaveMap = new HashMap<String, Integer>();
 		
@@ -397,6 +424,7 @@ public class Admin {
 		return leaveMap;
 	}
 	
+	// Find which items that appear in the person don't display in the top row
 	public boolean checkLeave() {
 		boolean check = true;
 		Set<String> missList = new HashSet<String>(); 
@@ -425,13 +453,21 @@ public class Admin {
 			}
 		}
 		
-		JOptionPane.showMessageDialog(null, 
+		if (check == false) {
+			JOptionPane.showMessageDialog(null, 
 				"You miss folowing items.\n" + display, "Warning", 
-					JOptionPane.WARNING_MESSAGE);
+				JOptionPane.WARNING_MESSAGE);
+		}
+		else {
+			JOptionPane.showMessageDialog(null, 
+				"No miss items.", "Information", 
+				JOptionPane.INFORMATION_MESSAGE);
+		}
 		
 		return check;
 	}
 	
+	// Find whether there are duplicated items in the top row
 	public boolean findRepeat() {
 		Set<String> repeatList = new HashSet<String>();
 		
@@ -446,6 +482,7 @@ public class Admin {
 			return true;
 	}
 	
+	// Update the table
 	public void updatePersonLeave() {				
 		for (int i = 0; i < person.size(); i++) {
 			Map<String, Integer> leaveMap = leaveCount(person.get(i));
@@ -495,6 +532,7 @@ public class Admin {
 				
 				popupMenu.show(me.getComponent(), me.getX(), me.getY());
 			}
+			
 		}
 	}
 	
@@ -554,12 +592,17 @@ public class Admin {
 					savefile.actionPerformed(ae);
 				}
 			}
+			
+			String fullpath = (new File("")).getAbsolutePath().replace('\\','/')
+					+ "/U2.csv";
 			String csvPath = JOptionPane
 					.showInputDialog(mainFrame, "Enter your csv path, ex :",
-						"C:/Users/U2/Desktop/test.csv");
+						fullpath);
 			if (csvPath == null) {
 				return;
 			}
+			
+			
 			ArrayList<List<String>> dataTable = readCSVToArrayList(csvPath);
 			try {
 				filledEmptySpace(dataTable);
@@ -580,16 +623,57 @@ public class Admin {
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+			
+			String fullpath = (new File("")).getAbsolutePath().replace('\\', '/') 
+					+ "/U2.csv";
 			String csvPath = JOptionPane.showInputDialog(mainFrame, 
 				"Enter the path that you want to save the file, ex :",
-					"C:/Users/U2/Desktop/test.csv");
+					fullpath);
 			if (csvPath == null) {
 				return;
 			}
 			
+			File csvFile = new File(csvPath);
+			if (csvFile.exists()) {
+				int option = JOptionPane.showConfirmDialog(mainFrame,
+						"The file exists. Do you want to overwrite the file ?", 
+						"Confirm", JOptionPane.YES_NO_OPTION);
+				if (option == 1 || option == -1) {
+					return;
+				}
+			}
+			
 			try {
-				FileWriter fw = new FileWriter(csvPath);
+				FileWriter fw = new FileWriter(csvFile);
 				BufferedWriter bw = new BufferedWriter(fw);
+				
+				for (int i1 = 0; i1 < item.size(); i1++) {
+					bw.write(item.get(i1).getText());
+					
+					if (i1 != (item.size() - 1))
+						bw.write(",");
+				}
+				bw.newLine();
+				
+				for (int i2 = 0; i2 < person.size(); i2++) {
+					bw.write(personName.get(i2).getText() + ",");
+					
+					for (int i3 = 0; i3 < person.get(i2).size(); i3++) {
+						bw.write(person.get(i2).get(i3).getText() + ",");
+					}
+					
+					for (int i4 = 0; i4 < personLeave.get(i2).size(); i4++) {
+						bw.write(personLeave.get(i2).get(i4).getText());
+						
+						if (i4 != (personLeave.get(i2).size() - 1))
+							bw.write(",");
+					}
+					
+					bw.newLine();
+				}
+				
+				bw.close();
+				
 			} catch (FileNotFoundException fe) {
 				JOptionPane.showMessageDialog(null,
 						"The system cannot find the path specified.",
