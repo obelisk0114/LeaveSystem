@@ -1,8 +1,8 @@
 # LeaveSystem
 Implement a system to manage staff members' leave
-'''
+```
 請先將檔案存成 csv 檔案
-'''
+```
 ## 底下為選單功能解說
 ### File : 檔案相關
 *   Open : 開啟舊檔
