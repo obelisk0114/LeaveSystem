@@ -56,6 +56,7 @@ public class Admin {
 	private JMenuItem openMenuItem, saveMenuItem;
 	private JMenuItem updatefunction, findRepeatfunction, checkfunction;
 	private JMenuItem helpMenuItem;
+	private Object clickButton = null;
 	
 	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
@@ -474,6 +475,9 @@ public class Admin {
 				popupMenu = new JPopupMenu();
 				Font popupfont = new Font("Serif", Font.BOLD, 15);
 				LinkedList<JMenuItem> popupItem = new LinkedList<JMenuItem>();
+				
+				clickButton = me.getSource();
+				
 				PopupSelect select = new PopupSelect();
 				for (int i = tag; i < item.size(); i++) {
 					JMenuItem tmpItem = new JMenuItem(item.get(i).getText());
@@ -497,7 +501,42 @@ public class Admin {
 	private class PopupSelect implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
 			String selectItem = ae.getActionCommand();
-			System.out.println(selectItem);
+			for (int i = 0; i < person.size(); i++) {
+				if (person.get(i).contains((JButton) clickButton)) {
+					String original = ((JButton) clickButton).getText(); 
+					if (!original.equals("")) {						
+						for (int i1 = tag; i1 < item.size(); i1++) {
+							if (original.equals(item.get(i1).getText())) {
+								String originalCount = personLeave.get(i)
+										.get(i1 - tag).getText();
+								int newCount = Integer.parseInt(originalCount) - 1;
+								personLeave.get(i).get(i1 - tag).setText(newCount + "");
+								break;
+							}
+						}
+					}
+					
+					((JButton) clickButton).setText(selectItem);
+					
+					for (int j = tag; j < item.size(); j++) {
+						if (item.get(j).getText().equals(selectItem)) {
+							String originalValue = personLeave.get(i)
+									.get(j - tag).getText();
+							int newValue;
+							if (originalValue.equals("")) {
+								newValue = 1;
+							}
+							else {								
+								newValue = Integer.parseInt(originalValue) + 1;
+							}
+							personLeave.get(i).get(j - tag).setText(newValue + "");
+							break;
+						}
+					}
+					
+					break;
+				}
+			}
 		}
 	}
 	
