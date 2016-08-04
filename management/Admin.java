@@ -60,6 +60,7 @@ public class Admin {
 	
 	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+	private buttonPop popup = new buttonPop();
 	
 	int tag = -1;  // Record the first position of "°²"
 	int maxSize = -1;  // Record the maximum row size
@@ -364,7 +365,6 @@ public class Admin {
 		System.out.println("maxSize : " + maxSize);
 		System.out.println("controlSize : " + controlSize);
 		
-		buttonPop popup = new buttonPop();
 		for (int i = 0; i < inputTable.size() - 1; i++) {
 			for (int j = 0; j < controlSize - 1; j++) {
 				gbc.weightx = 1;
@@ -378,8 +378,9 @@ public class Admin {
 				
 				person.get(i).get(j).setFont(font);
 			    frameTable.add(person.get(i).get(j), gbc);
+			    person.get(i).get(j).removeMouseListener(popup);
+			    person.get(i).get(j).addMouseListener(popup);
 			    person.get(i).get(j).setVisible(true);
-				person.get(i).get(j).addMouseListener(popup);
 			}
 		}
 
