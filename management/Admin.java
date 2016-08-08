@@ -33,7 +33,6 @@ import java.awt.Font;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,20 +46,23 @@ public class Admin {
 	private JPanel frameTable;
 	private JScrollPane containTable;
 	private JPopupMenu popupMenu;
-	private List<JLabel> item = new ArrayList<JLabel>(50);
-	private List<JLabel> personName = new ArrayList<JLabel>();
+	private List<JLabel> item = new ArrayList<JLabel>(50);   // the first row
+	private List<JLabel> personName = new ArrayList<JLabel>();   // the leftmost collumn
 	private ArrayList<List<JButton>> personLeave = new ArrayList<List<JButton>>();
 	private ArrayList<List<JButton>> person = new ArrayList<List<JButton>>();
 	private JMenuBar menuBar;
-	private JMenu modeMenu, helpMenu, functionMenu;
+	private JMenu modeMenu, helpMenu, functionMenu, fontSize;
 	private JMenuItem openMenuItem, saveMenuItem;
 	private JMenuItem updatefunction, findRepeatfunction, checkfunction;
+	private JMenuItem labelFontSize, paneFontSize, buttonFontSize;
 	private JMenuItem helpMenuItem;
-	private Object clickButton = null;
+	private Object clickObject = null;   // Record which object is clicked.
 	
+	private Font font = new Font("Serif", Font.BOLD, 15);
 	private Font paneFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
 	private buttonPop popup = new buttonPop();
+	private LabelPop labelPop = new LabelPop();
 	
 	int tag = -1;  // Record the first position of "假"
 	int maxSize = -1;  // Record the maximum row size
@@ -69,29 +71,26 @@ public class Admin {
 	public Admin(String title) {
 		mainFrame = new JFrame(title);
 		frameTable = new JPanel();
+		
 		containTable = new JScrollPane(frameTable); 
 		
 		UIManager.put("OptionPane.messageFont", paneFont);
+		UIManager.put("TextField.font", paneFont);
 		UIManager.put("OptionPane.buttonFont", paneFont);
 		
 		menuBar = new JMenuBar();
 		modeMenu = new JMenu("File");
-		modeMenu.setFont(labelFont);
 		functionMenu = new JMenu("Function");
-		functionMenu.setFont(labelFont);
+		fontSize = new JMenu("Change font size");
 		helpMenu = new JMenu("Help");
-		helpMenu.setFont(labelFont);
 		OpenFile openfile = new OpenFile();
 		SaveFile savefile = new SaveFile();
 		openMenuItem = new JMenuItem("Open");
-		openMenuItem.setFont(labelFont);
 		openMenuItem.addActionListener(openfile);
 		saveMenuItem = new JMenuItem("Save");
-		saveMenuItem.setFont(labelFont);
 		saveMenuItem.addActionListener(savefile);
 		
 		updatefunction = new JMenuItem("Update");
-		updatefunction.setFont(labelFont);
 		updatefunction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (personName.isEmpty()) {
@@ -104,7 +103,6 @@ public class Admin {
 			}
 		});
 		findRepeatfunction = new JMenuItem("Find repeat");
-		findRepeatfunction.setFont(labelFont);
 		findRepeatfunction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (personName.isEmpty()) {
@@ -125,7 +123,6 @@ public class Admin {
 			}
 		});
 		checkfunction = new JMenuItem("Check");
-		checkfunction.setFont(labelFont);
 		checkfunction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (personName.isEmpty()) {
@@ -138,8 +135,81 @@ public class Admin {
 			}
 		});
 		
+		labelFontSize = new JMenuItem("Change label font size");
+		labelFontSize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String fontSize = JOptionPane
+						.showInputDialog(mainFrame, "Enter a size, ex :",
+							"輸入文字大小");
+				if (fontSize == null) {
+					return;
+				}
+				
+				try {
+					int newFontSize = Integer.parseInt(fontSize);
+					labelFont = new Font(Font.SANS_SERIF, Font.BOLD, newFontSize);
+					mainFrame.remove(menuBar);
+					setMenu();
+				}
+				catch (NumberFormatException ne) {
+					JOptionPane.showMessageDialog(null, 
+							"You must enter a positive integer.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		paneFontSize = new JMenuItem("Change pane font size");
+		paneFontSize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String fontSize = JOptionPane
+						.showInputDialog(mainFrame, "Enter a size, ex :",
+							"輸入文字大小");
+				if (fontSize == null) {
+					return;
+				}
+				
+				try {
+					int newFontSize = Integer.parseInt(fontSize);
+					paneFont = new Font(Font.SANS_SERIF, Font.BOLD, newFontSize);
+					UIManager.put("OptionPane.messageFont", paneFont);
+					UIManager.put("TextField.font", paneFont);
+					UIManager.put("OptionPane.buttonFont", paneFont);
+				}
+				catch (NumberFormatException ne) {
+					JOptionPane.showMessageDialog(null, 
+							"You must enter a positive integer.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
+		buttonFontSize = new JMenuItem("Change list font size");
+		buttonFontSize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String fontSize = JOptionPane
+						.showInputDialog(mainFrame, "Enter a size, ex :",
+							"輸入文字大小");
+				if (fontSize == null) {
+					return;
+				}
+				
+				try {
+					int newFontSize = Integer.parseInt(fontSize);
+					font = new Font("Serif", Font.BOLD, newFontSize);
+					paintTable();
+					
+					mainFrame.revalidate();
+				}
+				catch (NumberFormatException ne) {
+					JOptionPane.showMessageDialog(null, 
+							"You must enter a positive integer.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		
 		helpMenuItem = new JMenuItem("About");
-		helpMenuItem.setFont(labelFont);
 		helpMenuItem.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -152,9 +222,9 @@ public class Admin {
 				}
 				);
 		
-		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
-		//ArrayList<List<String>> dataTable = readCSVToArrayList("C:/Users/TEMP/Downloads/test.csv");
-		// dataTable = readCSVToArrayList("C:/Users/TEMP/Documents/GitHub/LeaveSystem/test.csv");
+		// dataTable = readCSVToArrayList("C:/Users/TEMP/Desktop/test.csv");
+		// dataTable = readCSVToArrayList("C:/Users/TEMP/Downloads/test.csv");
+		// dataTable = readCSVToArrayList("C:/Users/15T-J000/Documents/GitHub/LeaveSystem/test.csv");
 	}
 	
 	public ArrayList<List<String>> readCSVToArrayList (String csvpath) {
@@ -172,7 +242,8 @@ public class Admin {
                 //存放每一列資料內容(橫的)
                 ArrayList<String> ticketStr = new ArrayList<String>();
                 
-                String[] item = line.split(",");  //csv文件為依據逗號切割
+                // The csv file uses "," to split different data
+                String[] item = line.split(",");
                 
                 //清除上一次存入的資料
                 ticketStr.clear();
@@ -198,8 +269,7 @@ public class Admin {
 			e.printStackTrace();
 		}
 		
-		// print table for test
-		printTable(Table);
+		//printTable(Table);    print table for test
 		
 		return Table;
 	}
@@ -235,8 +305,9 @@ public class Admin {
 	}
 	
 	// Split and save inputTable to item, personName, person, personLeave
+	// If the user first opened the file, return false
 	public boolean setTable(ArrayList<List<String>> inputTable) {
-		boolean firstTag = false;
+		boolean firstTag = false;   // Record whether the first "假" appears
 		if (reRead == true) {
 			item.clear();
 			item = new ArrayList<JLabel>(50);
@@ -248,6 +319,7 @@ public class Admin {
 			personLeave = new ArrayList<List<JButton>>();
 		}
 		
+		// Set item
 		for (int i = 0; i < inputTable.get(0).size(); i++) {
 			String element = inputTable.get(0).get(i);
 			if (element == null) {
@@ -262,8 +334,10 @@ public class Admin {
 			item.add(new JLabel(element, SwingConstants.CENTER));				
 		}
 		
+		// Set personName, person, and personLeave
 		for (int i = 1; i < inputTable.size(); i++) {
-			personName.add(new JLabel(inputTable.get(i).get(0), SwingConstants.CENTER));
+			personName.add(new JLabel(inputTable.get(i).get(0), 
+					SwingConstants.CENTER));
 			
 			List<JButton> personLeaveRow = new ArrayList<JButton>();
 			List<JButton> personRow = new ArrayList<JButton>(31);
@@ -295,10 +369,9 @@ public class Admin {
 		return repaintState;
 	}
 	
-	public void paintTable(ArrayList<List<String>> inputTable) {
+	public void paintTable() {
 		frameTable.removeAll();
 		frameTable.setLayout(new GridBagLayout());
-		Font font = new Font("Serif", Font.BOLD, 15);
 		int gridRecordX = 1;
 		int gridRecordY = 2;
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -321,7 +394,10 @@ public class Admin {
 			gbc.ipady = 10;
 			gbc.gridwidth = gridRecordX;
 		    gbc.gridheight = gridRecordY;
+		    item.get(0).setFont(font);
 		}
+		item.get(0).removeMouseListener(labelPop);
+		item.get(0).addMouseListener(labelPop);
 		frameTable.add(item.get(0), gbc);
 		item.get(0).setVisible(true);
 		
@@ -336,6 +412,8 @@ public class Admin {
 			gbc.gridy = 0;
 			
 			item.get(i).setFont(font);
+			item.get(i).removeMouseListener(labelPop);
+			item.get(i).addMouseListener(labelPop);
 			frameTable.add(item.get(i), gbc);
 			item.get(i).setVisible(true);
 		}
@@ -351,6 +429,8 @@ public class Admin {
 			gbc.gridy = gridRecordY + i * 2;
 			
 			personName.get(i).setFont(font);
+			personName.get(i).removeMouseListener(labelPop);
+			personName.get(i).addMouseListener(labelPop);
 		    frameTable.add(personName.get(i), gbc);
 		    personName.get(i).setVisible(true);
 		}
@@ -361,11 +441,8 @@ public class Admin {
 			controlSize = maxSize;
 			tagCondition = false;
 		}
-		System.out.println("tag : " + tag);
-		System.out.println("maxSize : " + maxSize);
-		System.out.println("controlSize : " + controlSize);
 		
-		for (int i = 0; i < inputTable.size() - 1; i++) {
+		for (int i = 0; i < person.size(); i++) {
 			for (int j = 0; j < controlSize - 1; j++) {
 				gbc.weightx = 1;
 				gbc.weighty = 1;
@@ -385,7 +462,7 @@ public class Admin {
 		}
 
 		if (tagCondition == true) {
-			for (int i = 0; i < inputTable.size() - 1; i++) {
+			for (int i = 0; i < personLeave.size(); i++) {
 				for (int j = 0; j < maxSize - controlSize; j++) {
 					gbc.weightx = 1;
 					gbc.weighty = 1;
@@ -403,6 +480,33 @@ public class Admin {
 				}
 			}
 		}
+	}
+	
+	// Return the whole table that includes item, personName, person, personLeave
+	public ArrayList<List<String>> outputTable () {
+		ArrayList<List<String>> output = new ArrayList<List<String>>();
+		
+		List<String> tempItem = new ArrayList<String>();
+		for (int i = 0; i < item.size(); i++) {
+			tempItem.add(item.get(i).getText());
+		}
+		output.add(tempItem);
+		
+		for (int i = 0; i < personName.size(); i++) {
+			List<String> tempPersonItem = new ArrayList<String>();
+			
+			tempPersonItem.add(personName.get(i).getText());
+			for (int j = 0; j < tag; j++) {
+				tempPersonItem.add(person.get(i).get(j).getText());
+			}
+			for (int j2 = 0; j2 < maxSize - tag - 1; j2++) {
+				tempPersonItem.add(personLeave.get(i).get(j2).getText());
+			}
+			
+			output.add(tempPersonItem);
+		}
+		
+		return output;
 	}
 	
 	// Return a person's each sum of each items
@@ -427,18 +531,23 @@ public class Admin {
 	}
 	
 	// Find which items that appear in the person don't display in the top row
+	// If there are missing items, return false.
 	public boolean checkLeave() {
 		boolean check = true;
-		Set<String> missList = new HashSet<String>(); 
+		Set<String> missList = new HashSet<String>();    // Record the missing items
 		
 		for (List<JButton> elementpack : person) {
 			for (JButton element : elementpack) {
 				String elementString = element.getText(); 
 				if (!elementString.equals("")) {
 					for (int k = tag; k < item.size(); k++) {
+						
+						// Find the item in the list. 
+						// Break the loop and enter the next item
 						if (item.get(k).getText().equals(elementString)) {
 							break;
 						}
+						
 						if (k == item.size() - 1) {
 							check = false;
 							missList.add(elementString);
@@ -457,19 +566,20 @@ public class Admin {
 		
 		if (check == false) {
 			JOptionPane.showMessageDialog(null, 
-				"You miss folowing items.\n" + display, "Warning", 
-				JOptionPane.WARNING_MESSAGE);
+					"You miss folowing items.\n" + display, "Warning", 
+					JOptionPane.WARNING_MESSAGE);
 		}
 		else {
 			JOptionPane.showMessageDialog(null, 
-				"No miss items.", "Information", 
-				JOptionPane.INFORMATION_MESSAGE);
+					"No miss items.", "Information", 
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		return check;
 	}
 	
 	// Find whether there are duplicated items in the top row
+	// If there are duplicated items, return true.
 	public boolean findRepeat() {
 		Set<String> repeatList = new HashSet<String>();
 		
@@ -508,56 +618,99 @@ public class Admin {
 		}
 	}
 	
+	// Set Button pressed event for every person.
 	private class buttonPop extends MouseAdapter {
 		public void mousePressed(MouseEvent me) {
 			if (SwingUtilities.isRightMouseButton(me)) {
-				popupMenu = new JPopupMenu();
-				Font popupfont = new Font("Serif", Font.BOLD, 15);
-				LinkedList<JMenuItem> popupItem = new LinkedList<JMenuItem>();
-				
-				clickButton = me.getSource();
+				popupMenu = new JPopupMenu();				
+				clickObject = me.getSource();   // Record which button was pressed
 				
 				PopupSelect select = new PopupSelect();
 				for (int i = tag; i < item.size(); i++) {
 					JMenuItem tmpItem = new JMenuItem(item.get(i).getText());
-					tmpItem.setFont(popupfont);
+					tmpItem.setFont(font);
 					tmpItem.addActionListener(select);
-					popupItem.add(tmpItem);
-				}
-				
-				while (!popupItem.isEmpty()) {
-					popupMenu.add(popupItem.removeFirst());
-					if (!popupItem.isEmpty()) {						
+					popupMenu.add(tmpItem);
+					
+					if (i != item.size() - 1) {						
 						popupMenu.addSeparator();
 					}
 				}
 				
 				popupMenu.show(me.getComponent(), me.getX(), me.getY());
 			}
-			
+			else if (SwingUtilities.isLeftMouseButton(me)) {
+				String newLeaveItem = JOptionPane
+						.showInputDialog(mainFrame, "Enter a new item, ex :",
+							"輸入其他請假類別");
+				if (newLeaveItem == null) {
+					return;
+				}
+				
+				for (int i = tag; i < item.size(); i++) {
+					if (item.get(i).getText().equals(newLeaveItem)) {
+						JOptionPane.showMessageDialog(null, 
+							"Duplicated items", "Warning", 
+							JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+				}
+				
+				clickObject = me.getSource();   // Record which button was pressed
+				((JButton) clickObject).setText(newLeaveItem);
+				item.add(new JLabel(newLeaveItem, SwingConstants.CENTER));
+				
+				maxSize++;
+				
+				for (int i = 0; i < personLeave.size(); i++) {
+					if (person.get(i).contains((JButton) clickObject)) {
+						personLeave.get(i).add(new JButton("1"));
+					}
+					else {						
+						personLeave.get(i).add(new JButton(""));
+					}
+				}
+				
+				paintTable();
+				
+				//mainFrame.add(frameTable, BorderLayout.CENTER);
+				mainFrame.revalidate();
+				//frameTable.repaint();
+			}
 		}
 	}
 	
+	// Set Button pressed pop up menu for every person.
 	private class PopupSelect implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
 			String selectItem = ae.getActionCommand();
 			for (int i = 0; i < person.size(); i++) {
-				if (person.get(i).contains((JButton) clickButton)) {
-					String original = ((JButton) clickButton).getText(); 
+				if (person.get(i).contains((JButton) clickObject)) {
+					String original = ((JButton) clickObject).getText(); 
+					
+					// old item minuses one
 					if (!original.equals("")) {						
 						for (int i1 = tag; i1 < item.size(); i1++) {
 							if (original.equals(item.get(i1).getText())) {
 								String originalCount = personLeave.get(i)
 										.get(i1 - tag).getText();
-								int newCount = Integer.parseInt(originalCount) - 1;
-								personLeave.get(i).get(i1 - tag).setText(newCount + "");
+								try {									
+									int newCount = Integer.parseInt(originalCount) - 1;
+									personLeave.get(i).get(i1 - tag).setText(newCount + "");
+								}
+								catch(NumberFormatException ne) {
+									JOptionPane.showMessageDialog(null, 
+										"You need to update the table.", "Warning", 
+											JOptionPane.WARNING_MESSAGE);
+								}
 								break;
 							}
 						}
 					}
 					
-					((JButton) clickButton).setText(selectItem);
+					((JButton) clickObject).setText(selectItem);
 					
+					// new item pluses one
 					for (int j = tag; j < item.size(); j++) {
 						if (item.get(j).getText().equals(selectItem)) {
 							String originalValue = personLeave.get(i)
@@ -576,6 +729,169 @@ public class Admin {
 					
 					break;
 				}
+			}
+		}
+	}
+	
+	// Set JLabel right click event for every item and personName
+	private class LabelPop extends MouseAdapter {
+		public void mousePressed(MouseEvent me) {
+			if (SwingUtilities.isRightMouseButton(me)) {
+				JPopupMenu popupAction = new JPopupMenu();
+				
+				clickObject = me.getSource();   // Record which label was pressed
+				labelPopupSelect labelSelect = new labelPopupSelect();
+				
+				JMenuItem tmpItem1 = new JMenuItem("Add");
+				tmpItem1.setFont(font);
+				tmpItem1.addActionListener(labelSelect);
+				JMenuItem tmpItem2 = new JMenuItem("Delete");
+				tmpItem2.setFont(font);
+				tmpItem2.addActionListener(labelSelect);
+				JMenuItem tmpItem3 = new JMenuItem("Edit");
+				tmpItem3.setFont(font);
+				tmpItem3.addActionListener(labelSelect);
+				
+				popupAction.add(tmpItem1);
+				popupAction.addSeparator();
+				popupAction.add(tmpItem2);
+				popupAction.addSeparator();
+				popupAction.add(tmpItem3);
+				
+				popupAction.show(me.getComponent(), me.getX(), me.getY());
+			}
+		}
+	}
+	
+	// Set JLabel right click pop up menu for every item and personName
+	private class labelPopupSelect implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			String labelPopItem = ae.getActionCommand();
+			if (labelPopItem.equals("Edit")) {
+				String newName = JOptionPane
+						.showInputDialog(mainFrame, "Enter a new name, ex :",
+							"輸入新名稱");
+				if (newName == null) {
+					return;
+				}
+				
+				((JLabel) clickObject).setText(newName);
+			}
+			
+			else if (labelPopItem.equals("Add")) {
+				String newName = JOptionPane
+					.showInputDialog(mainFrame, "Enter the new adding item, ex :",
+							"輸入新名稱");
+				if (newName == null) {
+					return;
+				}
+				
+				// In the first row
+				if (item.contains((JLabel) clickObject)) {					
+					maxSize++ ;
+					for (int i = 0; i < item.size(); i++) {
+						
+						// Add item in the person part
+						if (i < tag && (JLabel) clickObject == item.get(i)) {
+							item.add(i + 1, new JLabel(newName, SwingConstants.CENTER));
+							tag++ ;
+							
+							for (int j = 0; j < person.size(); j++) {
+								person.get(j).add((i + 1) - 1, new JButton(""));
+							}
+							
+							break;
+						}
+						
+						// Add item in the personLeave part
+						else if (i >= tag && (JLabel) clickObject == item.get(i)){
+							item.add(i + 1, new JLabel(newName, SwingConstants.CENTER));
+							
+							for (int j = 0; j < personLeave.size(); j++) {
+								personLeave.get(j).add((i + 1) - tag, new JButton(""));
+							}
+							
+							break;
+						}
+					}
+				}
+				
+				// In the leftmost column
+				else {					
+					for (int i = 0; i < personName.size(); i++) {
+						if ((JLabel) clickObject == personName.get(i)) {	
+							personName.add(i + 1, new JLabel(newName, SwingConstants.CENTER));
+							
+							ArrayList<JButton> tmpPerson = new ArrayList<JButton>();
+							for (int i1 = 0; i1 < tag; i1++) {
+								tmpPerson.add(new JButton(""));
+							}
+							person.add(i + 1, tmpPerson);
+							
+							ArrayList<JButton> tmpLeave = new ArrayList<JButton>();
+							for (int i2 = 0; i2 < maxSize - tag; i2++) {
+								tmpLeave.add(new JButton(""));
+							}
+							personLeave.add(i + 1, tmpLeave);
+							
+							break;
+						}
+					}
+				}
+				
+				paintTable();
+				
+				mainFrame.revalidate();
+			}
+
+			else {
+				// In the first row
+				if (item.contains((JLabel) clickObject)) {
+					maxSize-- ;
+					
+					for (int i = 0; i < item.size(); i++) {
+						
+						// Delete item in the person part
+						if (i < tag && (JLabel) clickObject == item.get(i)) {
+							item.remove(i);
+							tag-- ;
+							
+							for (int j = 0; j < person.size(); j++) {
+								person.get(j).remove(i - 1);
+							}
+							
+							break;
+						}
+						
+						// Delete item in the personLeave part
+						else if (i >= tag && (JLabel) clickObject == item.get(i)){
+							item.remove(i);
+							
+							for (int j = 0; j < personLeave.size(); j++) {
+								personLeave.get(j).remove(i - tag);
+							}
+							
+							break;
+						}
+					}
+				}
+				
+				// In the leftmost column
+				else {					
+					for (int i = 0; i < personName.size(); i++) {
+						if ((JLabel) clickObject == personName.get(i)) {	
+							personName.remove(i);
+							person.remove(i);
+							personLeave.remove(i);
+							
+							break;
+						}
+					}
+				}
+				
+				paintTable();
+				
+				mainFrame.revalidate();
 			}
 		}
 	}
@@ -609,7 +925,7 @@ public class Admin {
 			try {
 				filledEmptySpace(dataTable);
 				setTable(dataTable);
-				paintTable(dataTable);
+				paintTable();
 			} catch (Exception e) {
 				return;
 			}
@@ -688,18 +1004,44 @@ public class Admin {
 		}
 	}
 	
-	public void launchFrame() {
-		mainFrame.setSize(width, height);
-		mainFrame.add(menuBar);
+	public void setMenu() {
 		menuBar.add(modeMenu);
 		menuBar.add(functionMenu);
 		menuBar.add(helpMenu);
+		modeMenu.setFont(labelFont);
 		modeMenu.add(openMenuItem);
 		modeMenu.add(saveMenuItem);
+		functionMenu.setFont(labelFont);
 		functionMenu.add(updatefunction);
 		functionMenu.add(findRepeatfunction);
 		functionMenu.add(checkfunction);
+		functionMenu.add(fontSize);
+		helpMenu.setFont(labelFont);
 		helpMenu.add(helpMenuItem);
+		
+		fontSize.setFont(labelFont);
+		fontSize.add(labelFontSize);
+		fontSize.add(paneFontSize);
+		fontSize.add(buttonFontSize);
+		
+		openMenuItem.setFont(labelFont);
+		saveMenuItem.setFont(labelFont);
+
+		updatefunction.setFont(labelFont);
+		findRepeatfunction.setFont(labelFont);
+		checkfunction.setFont(labelFont);
+		
+		labelFontSize.setFont(labelFont);
+		paneFontSize.setFont(labelFont);
+		buttonFontSize.setFont(labelFont);
+
+		helpMenuItem.setFont(labelFont);
+	}
+	
+	public void launchFrame() {
+		mainFrame.setSize(width, height);
+		mainFrame.add(menuBar);
+		setMenu();
 		
 		mainFrame.add(containTable);
 		mainFrame.setJMenuBar(menuBar);
